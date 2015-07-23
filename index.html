@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Staticjs by bradberger</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Staticjs</h1>
+      <h2 class="project-tagline">Lightweight, feature-rich, promise driven script and static resource loader.</h2>
+      <a href="https://github.com/bradberger/staticjs" class="btn">View on GitHub</a>
+      <a href="https://github.com/bradberger/staticjs/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/bradberger/staticjs/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <p><code>static.js</code> is a full-featured, lightweight resource loading library for
+JavaScript.  supports loading of JavaScript, CSS, and image files. It uses
+modern JS features to have a small footprint and excellent performance.</p>
+
+<p>Current size is <code>~1.28 kB</code> gzipped, and <code>~3.9 kB</code> with all polyfills.</p>
+
+<h2>
+<a id="browser-support" class="anchor" href="#browser-support" aria-hidden="true"><span class="octicon octicon-link"></span></a>Browser support</h2>
+
+<p>The library uses JavaScript promises, so you'll need to
+use the <code>loader.compat.js</code> script if the target browser(s)
+don't already <a href="http://caniuse.com/#search=promises">support promises</a>.</p>
+
+<p>Other more recent JavaScript methods are used, too. Again, you'll
+need to use the <code>loader.compat.js</code> version if the target browsers
+do not support those features.</p>
+
+<ul>
+<li>
+<code>Array.isArray</code> <a href="http://kangax.github.io/compat-table/es5/#Array.isArray">Browser support</a>
+</li>
+<li>
+<code>Array.prototype.forEach</code> <a href="http://kangax.github.io/compat-table/es5/#Array.prototype.forEach">Browser support</a>
+</li>
+<li>
+<code>String.prototype.endsWith</code> <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/String/endsWith#Browser_compatibility">Browser support</a>
+</li>
+<li>
+<code>localStorage</code> <a href="http://caniuse.com/#search=localstorage">Browser support</a>
+</li>
+<li>
+<code>Array.prototype.map</code> <a href="https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/map#Browser_compatibility">Browser support</a>
+</li>
+<li>
+<code>window.requestAnimationFrame</code> <a href="https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame">Browser support</a>
+</li>
+</ul>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<h3>
+<a id="bundles" class="anchor" href="#bundles" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bundles</h3>
+
+<p>Bundles are useful to load multiple resources at once, and then do something
+when their loaded.  can use them for CSS, JavaScript, and images. Using it for
+all three types of files is great prevent an unstyled flash of anything.</p>
+
+<div class="highlight highlight-javascript"><pre>
+<span class="pl-c">// Define a bundle.</span>
+$<span class="pl-k">static</span>.<span class="pl-c1">load</span>(<span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>jquery<span class="pl-pds">"</span></span>);
+
+<span class="pl-c">// Promise when a anonymous bundle is loaded.</span>
+$<span class="pl-k">static</span>.<span class="pl-c1">load</span>(<span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/bootstrap/3.3.5/css/bootstrap.min.css<span class="pl-pds">"</span></span>).then(<span class="pl-k">function</span>() {
+    <span class="pl-en">console</span><span class="pl-c1">.info</span>(<span class="pl-s"><span class="pl-pds">"</span>Bootstrap CSS loaded!<span class="pl-pds">"</span></span>);
+});
+
+<span class="pl-c">// Promise when a named bundle is loaded.</span>
+$<span class="pl-k">static</span>.ready(<span class="pl-s"><span class="pl-pds">"</span>jquery<span class="pl-pds">"</span></span>).then(<span class="pl-k">function</span>() {
+    $<span class="pl-k">static</span>.<span class="pl-c1">load</span>([
+        <span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/bootstrap/3.3.5/js/bootstrap.min.js<span class="pl-pds">"</span></span>,
+        <span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/bootstrap/3.3.5/css/bootstrap.min.css<span class="pl-pds">"</span></span>,
+        <span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js<span class="pl-pds">"</span></span>
+    ]).then(<span class="pl-k">function</span>() {
+        <span class="pl-en">console</span><span class="pl-c1">.info</span>(<span class="pl-s"><span class="pl-pds">"</span>Bootstrap loaded!<span class="pl-pds">"</span></span>);
+    });
+});
+
+<span class="pl-c">// Callback when a named bundle is loaded.</span>
+$<span class="pl-k">static</span>.ready(<span class="pl-s"><span class="pl-pds">"</span>jquery<span class="pl-pds">"</span></span>, <span class="pl-k">function</span>() {
+    <span class="pl-en">console</span><span class="pl-c1">.info</span>(<span class="pl-s"><span class="pl-pds">"</span>jQuery done again!<span class="pl-pds">"</span></span>);
+});
+</pre></div>
+
+<h4>
+<a id="setting-a-callback-before-defining-a-bundle" class="anchor" href="#setting-a-callback-before-defining-a-bundle" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setting a callback before defining a bundle.</h4>
+
+<p>You can even set a callback before the bundle is defined.
+So the following actually works.</p>
+
+<div class="highlight highlight-javascript"><pre>
+$<span class="pl-k">static</span>.ready(<span class="pl-s"><span class="pl-pds">"</span>jquery<span class="pl-pds">"</span></span>).then(<span class="pl-k">function</span>() {
+    <span class="pl-en">console</span><span class="pl-c1">.log</span>(<span class="pl-s"><span class="pl-pds">"</span>jQuery is loaded!<span class="pl-pds">"</span></span>);
+});
+
+$<span class="pl-k">static</span>.<span class="pl-c1">load</span>(<span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>jQuery<span class="pl-pds">"</span></span>);
+</pre></div>
+
+<h3>
+<a id="loading-as-inline-elements" class="anchor" href="#loading-as-inline-elements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Loading as Inline Elements</h3>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-c">// Get the resources and inject the contents</span>
+<span class="pl-c">// as innerHTML inside their own element.</span>
+$<span class="pl-k">static</span>.get(<span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js<span class="pl-pds">"</span></span>)
+    .then(<span class="pl-k">function</span>() {
+        <span class="pl-en">console</span><span class="pl-c1">.info</span>(<span class="pl-s"><span class="pl-pds">"</span>jquery.get.done<span class="pl-pds">"</span></span>);
+    });
+
+<span class="pl-c">// Cache the resources in localStorage, and inject</span>
+<span class="pl-c">// the content s as innerHTML inside their own element.</span>
+$<span class="pl-k">static</span>.cache(<span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js<span class="pl-pds">"</span></span>)
+    .then(<span class="pl-k">function</span>() {
+        <span class="pl-en">console</span><span class="pl-c1">.info</span>(<span class="pl-s"><span class="pl-pds">"</span>jquery.cached<span class="pl-pds">"</span></span>);
+    });</pre></div>
+
+<h3>
+<a id="loading-synchronously" class="anchor" href="#loading-synchronously" aria-hidden="true"><span class="octicon octicon-link"></span></a>Loading Synchronously</h3>
+
+<p>Sometimes, it makes sense to load things synchronously.
+In that case, you can use the <code>sync()</code> method.</p>
+
+<div class="highlight highlight-javascript"><pre>
+<span class="pl-c">// Load the resources synchronously.</span>
+$<span class="pl-k">static</span>.sync([
+    <span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/bootstrap/3.3.5/js/bootstrap.min.js<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/bootstrap/3.3.5/css/bootstrap.min.css<span class="pl-pds">"</span></span>
+]);
+
+<span class="pl-c">// Load the resources synchronously as a bundle.</span>
+$<span class="pl-k">static</span>.sync([
+    <span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/bootstrap/3.3.5/js/bootstrap.min.js<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/bootstrap/3.3.5/css/bootstrap.min.css<span class="pl-pds">"</span></span>
+], <span class="pl-s"><span class="pl-pds">"</span>bootstrap<span class="pl-pds">"</span></span>);
+
+<span class="pl-c">// Alternate syntax for synchronously loading resources.</span>
+$<span class="pl-k">static</span>.<span class="pl-c1">load</span>([
+    <span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/bootstrap/3.3.5/js/bootstrap.min.js<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/bootstrap/3.3.5/css/bootstrap.min.css<span class="pl-pds">"</span></span>
+], <span class="pl-s"><span class="pl-pds">"</span>bootstrap<span class="pl-pds">"</span></span>, <span class="pl-c1">true</span>);
+
+<span class="pl-c">// Clearing cached resources</span>
+$<span class="pl-k">static</span>.<span class="pl-c1">clear</span>([
+    <span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/bootstrap/3.3.5/js/bootstrap.min.js<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>//cdn.jsdelivr.net/bootstrap/3.3.5/css/bootstrap.min.css<span class="pl-pds">"</span></span>
+]);
+</pre></div>
+
+<h3>
+<a id="loading-a-resource-multiple-times" class="anchor" href="#loading-a-resource-multiple-times" aria-hidden="true"><span class="octicon octicon-link"></span></a>Loading a Resource Multiple Times</h3>
+
+<p>The promises for each resource are reused, so you can safely attempt
+loading any given resource multiple times, and it will result in
+only a single HTTP request if it's already loaded or in the process
+of being loaded.</p>
+
+<p>The above is even true if a single file is in multiple different
+bundles, since individual files are cached on the based on the uri,
+not the bundle name.</p>
+
+<h3>
+<a id="known-limitations" class="anchor" href="#known-limitations" aria-hidden="true"><span class="octicon octicon-link"></span></a>Known Limitations</h3>
+
+<h4>
+<a id="content-types" class="anchor" href="#content-types" aria-hidden="true"><span class="octicon octicon-link"></span></a>Content-Types</h4>
+
+<p>When using the <code>sync()</code>, <code>get()</code>, <code>cache()</code> and <code>load()</code> methods,
+the each resource needs to have a <code>.js</code> or <code>.css</code> extension, otherwise
+it will be treated as an image.</p>
+
+<p>This could be fixed by some fancier AJAX techniques like detecting
+the content-type headers once loaded, but that's not implemented yet.</p>
+
+<h4>
+<a id="loading-images" class="anchor" href="#loading-images" aria-hidden="true"><span class="octicon octicon-link"></span></a>Loading Images</h4>
+
+<p>Right now, images can only be loaded in the background, but actually
+using them in the DOM is not supported. That is planned in a future update.
+Until then, if you need to use the newly loaded image in the DOM, it requires
+doing something like this:</p>
+
+<div class="highlight highlight-javascript"><pre>
+$<span class="pl-k">static</span>.<span class="pl-c1">load</span>(<span class="pl-s"><span class="pl-pds">"</span>/path/to/image.jpg<span class="pl-pds">"</span></span>).then(<span class="pl-k">function</span>(<span class="pl-smi">newImg</span>) {
+
+    <span class="pl-k">var</span> img <span class="pl-k">=</span> <span class="pl-c1">document</span>.querySelector(<span class="pl-s"><span class="pl-pds">"</span>#imageToReplace<span class="pl-pds">"</span></span>);
+
+    <span class="pl-c">// Changing the source after loaded.</span>
+    img.src <span class="pl-k">=</span> newImage.src;
+
+    <span class="pl-c">// Or, replacing the whole image after loaded.</span>
+    img <span class="pl-k">=</span> newImg;
+
+});
+</pre></div>
+
+<h3>
+<a id="development" class="anchor" href="#development" aria-hidden="true"><span class="octicon octicon-link"></span></a>Development</h3>
+
+<p>The build system is GulpJS, so just run <code>gulp watch</code> during development.</p>
+
+<h3>
+<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing</h3>
+
+<h3>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h3>
+
+<p><code>static.js</code> is licensed under MPL-2.0.</p>
+
+<h3>
+<a id="to-do" class="anchor" href="#to-do" aria-hidden="true"><span class="octicon octicon-link"></span></a>To Do</h3>
+
+<ul>
+<li>Full test suite</li>
+<li>Better documentation</li>
+<li>
+<code>livereload</code> for development</li>
+<li>JS linting for development</li>
+<li>JS linting for testing</li>
+<li>Media type support for CSS</li>
+<li>Replacing of images in the DOM after loaded</li>
+<li>Support for any other type of file to pre-load (webfonts, etc.)</li>
+<li>Rewrite relative url's inside JS/CSS loaded with <code>cache()</code>.</li>
+</ul>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/bradberger/staticjs">Staticjs</a> is maintained by <a href="https://github.com/bradberger">bradberger</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
+
