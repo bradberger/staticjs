@@ -1,0 +1,63 @@
+<!doctype html>
+<head>
+    <script src="../dist/static.js"></script>
+</head>
+<body>
+    <div class="container">
+        <button class="btn btn-primary btn-block">Not loaded</button>
+    </div>
+    <script>
+    // Promise when a anonymous bundle is loaded.
+    $static.load("https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css").then(function() {
+        console.info("Bootstrap CSS loaded!");
+    });
+
+    // Promise when a named bundle is loaded.
+    $static.ready("jquery").then(function() {
+
+        setTimeout(function() {
+            console.log("jquery ready", "undefined" !== typeof jQuery);
+        }, 100);
+
+        $static.load([
+            "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js",
+            "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css",
+            "https://cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js"
+        ]).then(function() {
+            jQuery(".btn").html("Bootstrap loaded!");
+        });
+
+    });
+
+    // Callback when a named bundle is loaded.
+    $static.ready("jquery", function() {
+        console.info("jQuery done again!");
+    });
+
+    // Define a bundle.
+    setTimeout(function() {
+      $static.load("https://cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js", "jquery");
+    }, 1000);
+
+    // Get the resources and inject the contents
+    // as innerHTML inside their own element.
+    $static.get("https://cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js")
+        .then(function() {
+            console.info("jquery.get.done");
+        });
+
+    // // Cache the resources in localStorage, and inject
+    // // the content s as innerHTML inside their own element.
+    $static.cache("https://cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js")
+        .then(function() {
+            console.info("jquery.cached");
+        });
+
+    // // Load the resources in synchronously.
+    $static.sync([
+        "https://cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css"
+    ]);
+    </script>
+</body>
