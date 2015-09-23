@@ -1,3 +1,6 @@
+[![Build Status](https://semaphoreci.com/api/v1/projects/1abfb0d9-1eb1-4b43-bac0-4ca3a04f5048/549732/badge.svg)](https://semaphoreci.com/brad/staticjs)
+[![Code Climate](https://codeclimate.com/github/bradberger/staticjs/badges/gpa.svg)](https://codeclimate.com/github/bradberger/staticjs)
+[![Test Coverage](https://codeclimate.com/github/bradberger/staticjs/badges/coverage.svg)](https://codeclimate.com/github/bradberger/staticjs/coverage)
 
 `static.js` is a full-featured, lightweight resource loading library for
 JavaScript.  supports loading of JavaScript, CSS, and image files. It uses
