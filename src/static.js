@@ -1,15 +1,14 @@
 (function(window) {
 
-    var BUNDLE_INTERVAL_DURATION = 100;
-    var emptyFunc = function() { return null; };
+    var noop = function() { };
     var storage = window.localStorage || {
-        getItem: emptyFunc,
-        setItem: emptyFunc,
-        removeItem: emptyFunc
+        getItem: noop,
+        setItem: noop,
+        removeItem: noop
     };
 
     var isJavaScript = function(url) {
-        return url.toString().toLowerCase().endsWith(".js");
+        return url.toString().toLowerCase().endsWith(".js");  
     };
 
     var isCss = function(url) {
