@@ -1,23 +1,11 @@
-(function(window) {
+(function() {
 
     var noop = function() { };
     var storage = window.localStorage || {
         getItem: noop,
         setItem: noop,
-        removeItem: noop
-    };
-
-    var isJavaScript = function(url) {
-        return url.toString().toLowerCase().endsWith(".js");  
-    };
-
-    var isCss = function(url) {
-        return url.toString().toLowerCase().endsWith(".css");
-    };
-
-    var isImage = function(url) {
-        var src = url.toLowerCase();
-        return src.endsWith(".png") || src.endsWith(".jpg") || src.endsWith(".jpeg") || src.endsWith(".webp");
+        removeItem: noop,
+        clear: noop
     };
 
     /**
@@ -29,6 +17,18 @@
         this.scripts = {};
         this.stylesheets = {};
         this.images = {};
+    };
+
+    Static.prototype.isJS = function(url) {
+        return !!url.match(/.*\.js+$/i);
+    };
+
+    Static.prototype.isCSS = function(url) {
+        return !!url.match(/.*\.css+$/i);
+    };
+
+    Static.prototype.isImage = function(url) {
+        return !!url.match(/.*\.(jpe?g|png|webp|gif)+$/i);
     };
 
     /**
@@ -91,13 +91,13 @@
 
         return this[bundle] = this.bundles[bundle] = Promise.all(resources.map(function(url) {
 
-            if (isJavaScript(url)) {
+            if (self.isJS(url)) {
                 return self.script(url);
             }
 
-            if (isCss(url)) {
+            if (self.isCSS(url)) {
                 return self.css(url);
-            }
+            } 
 
             return self.image(url);
 
@@ -389,15 +389,15 @@
 
         var promise = Promise.all(url.map(function(src) {
 
-            if (isJavaScript(src)) {
+            if (self.isJS(src)) {
                 return self.getScript(url);
             }
 
-            if (isCss(src)) {
+            if (self.isCSS(src)) {
                 return self.getStylesheet(url);
             }
 
-            if (isImage(url)) {
+            if (self.isImage(url)) {
                 return self.getImage(url);
             }
 
@@ -423,6 +423,13 @@
 
     };
 
+    Static.prototype._$$reset = function() {
+        this.bundles = [];
+        this.scripts = {};
+        this.stylesheets = {};
+        this.images = {};
+    };
+
     window.$static = new Static();
 
-})(window);
+})();

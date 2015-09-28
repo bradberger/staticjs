@@ -20,7 +20,6 @@ do not support those features.
 
 - `Array.isArray` [Browser support](http://kangax.github.io/compat-table/es5/#Array.isArray)
 - `Array.prototype.forEach` [Browser support](http://kangax.github.io/compat-table/es5/#Array.prototype.forEach)
-- `String.prototype.endsWith` [Browser support](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/String/endsWith#Browser_compatibility)
 - `localStorage` [Browser support](http://caniuse.com/#search=localstorage)
 - `Array.prototype.map` [Browser support](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Array/map#Browser_compatibility)
 - `window.requestAnimationFrame` [Browser support](https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame)
