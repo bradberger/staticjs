@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/bradberger/staticjs.png?label=ready&title=Ready)](https://waffle.io/bradberger/staticjs)
 [![Build Status](https://semaphoreci.com/api/v1/projects/1abfb0d9-1eb1-4b43-bac0-4ca3a04f5048/549732/badge.svg)](https://semaphoreci.com/brad/staticjs)
 [![Code Climate](https://codeclimate.com/github/bradberger/staticjs/badges/gpa.svg)](https://codeclimate.com/github/bradberger/staticjs)
 [![Test Coverage](https://codeclimate.com/github/bradberger/staticjs/badges/coverage.svg)](https://codeclimate.com/github/bradberger/staticjs/coverage)
