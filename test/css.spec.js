@@ -2,8 +2,10 @@
 /* global $static */
 describe("css test suite", function() {
 
+    window.localStorage.clear();
+
     var url = "//cdn.jsdelivr.net/angularjs/1.4.2/angular-csp.css";
-    var url2 = "/invalid.css";
+    var url2 = "/invalid.css"; 
 
     beforeEach(function() {
         $static._$$reset();

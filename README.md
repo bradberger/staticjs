@@ -120,13 +120,15 @@ $static.load([
     "//cdn.jsdelivr.net/bootstrap/3.3.5/css/bootstrap.min.css"
 ], "bootstrap", true);
 
-// Clearing cached resources
+// Clearing cached resources from localStorage
 $static.clear([
     "//cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js",
     "//cdn.jsdelivr.net/bootstrap/3.3.5/js/bootstrap.min.js",
     "//cdn.jsdelivr.net/bootstrap/3.3.5/css/bootstrap.min.css"
 ]);
 
+// Resetting everything - clearing cache and settings.
+$static.reset();
 ```
 
 ### Loading a Resource Multiple Times
@@ -153,26 +155,41 @@ the content-type headers once loaded, but that's not implemented yet.
 
 #### Loading Images
 
-Right now, images can only be loaded in the background, but actually
-using them in the DOM is not supported. That is planned in a future update.
-Until then, if you need to use the newly loaded image in the DOM, it requires
-doing something like this:
+Loading images (which are stored via localStorage, too!) can be done
+like this:
 
 ```javascript
+<div class="mobile-img" data-src="/my/image/1.png"></div>
+<div class="mobile-img" data-src="/my/image/2.png"></div>
+$static.loadImagesBySelector(".mobile-img");
+```
 
-$static.load("/path/to/image.jpg").then(function(newImg) {
+That method also supports Client Hinting, so if the target server also
+supports it, then enable [client hinting](https://developers.google.com/web/updates/2015/09/automating-resource-selection-with-client-hints). Keep in mind that if CORS rules
+apply, so third-party images without the proper headers will not load. The
+CORS setup on those servers must also support the client-hinting headers, too.
 
-    var img = document.querySelector("#imageToReplace");
+You can also set the "save-data" hint option, too.
 
-    // Changing the source after loaded.
-    img.src = newImage.src;
-
-    // Or, replacing the whole image after loaded.
-    img = newImg;
-
-});
+```html
+<body>
+    <div class="mobile-img" data-src="/my/image/1.png"></div>
+    <div class="mobile-img" data-src="/my/image/2.png"></div>
+    <script>
+    $static.enableSaveData();
+    $static.enableClientHints();
+    $static.loadImagesBySelector(".mobile-img");
+    </script>
 
 ```
+
+#### Caching Images
+
+Images are converted to base64 before being cached in localStorage. Because
+of browser limitations, though, this will fail if the image does not have
+the proper `Access-Control-Allow-Origin` set. So if you're using images from
+external sources, and they do not have `Access-Control-Allow-Origin: *` or
+similar, then caching will fail, and the promise will be rejected.
 
 ### Development
 
@@ -180,7 +197,7 @@ The build system is GulpJS, so just run `gulp watch` during development.
 
 ### Contributing
 
-
+Help is very much wanted!
 
 ### License
 
@@ -190,10 +207,5 @@ The build system is GulpJS, so just run `gulp watch` during development.
 
 - Full test suite
 - Better documentation
-- `livereload` for development
-- JS linting for development
-- JS linting for testing
 - Media type support for CSS
-- Replacing of images in the DOM after loaded
-- Support for any other type of file to pre-load (webfonts, etc.)
 - Rewrite relative url's inside JS/CSS loaded with `cache()`.

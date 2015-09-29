@@ -1,7 +1,16 @@
 (function() {
 
+    /**
+     * A function which does nothing.
+     * @return {void} Returns nothing.
+     */
     var noop = function() { };
-    var storage = window.localStorage || {
+
+    /**
+     * [storage description]
+     * @type {[type]}
+     */
+    var storage = "localStorage" in window ? window.localStorage : {
         getItem: noop,
         setItem: noop,
         removeItem: noop,
@@ -9,26 +18,106 @@
     };
 
     /**
-     *
-     * @constructor
+     * [function description]
+     * @return {[type]} [description]
      */
     var Static = function() {
-        this.bundles = [];
+
+        /**
+         * [bundles description]
+         * @type {Object}
+         */
+        this.bundles = {};
+
+        /**
+         * [scripts description]
+         * @type {Object}
+         */
         this.scripts = {};
+
+        /**
+         * [stylesheets description]
+         * @type {Object}
+         */
         this.stylesheets = {};
+
+        /**
+         * [images description]
+         * @type {Object}
+         */
         this.images = {};
+
+        /**
+         * [clientHints description]
+         * @type {Boolean}
+         */
+        this.clientHints = false;
+
+        /**
+         * [saveData description]
+         * @type {Boolean}
+         */
+        this.saveData = false;
+
     };
 
+    /**
+     * [function description]
+     * @return {[type]} [description]
+     */
+    Static.prototype.enableClientHints = function() {
+        this.clientHints = true;
+    };
+
+    /**
+     * [function description]
+     * @return {[type]} [description]
+     */
+    Static.prototype.disableClientHints = function() {
+        this.clientHints = false;
+    };
+
+    /**
+     * [function description]
+     * @return {[type]} [description]
+     */
+    Static.prototype.enableSaveData = function() {
+        this.saveData = true;
+    };
+
+    /**
+     * [function description]
+     * @return {[type]} [description]
+     */
+    Static.prototype.disableSaveData = function() {
+        this.saveData = false;
+    };
+
+    /**
+     * [function description]
+     * @param  {[type]} url [description]
+     * @return {[type]}     [description]
+     */
     Static.prototype.isJS = function(url) {
-        return !!url.match(/.*\.js+$/i);
+        return !!url.toString().match(/.*\.js+$/i);
     };
 
+    /**
+     * [function description]
+     * @param  {[type]} url [description]
+     * @return {[type]}     [description]
+     */
     Static.prototype.isCSS = function(url) {
-        return !!url.match(/.*\.css+$/i);
+        return !!url.toString().match(/.*\.css+$/i);
     };
 
+    /**
+     * [function description]
+     * @param  {[type]} url [description]
+     * @return {[type]}     [description]
+     */
     Static.prototype.isImage = function(url) {
-        return !!url.match(/.*\.(jpe?g|png|webp|gif)+$/i);
+        return !!url.toString().match(/.*\.(jpe?g|png|webp|gif)+$/i);
     };
 
     /**
@@ -68,43 +157,45 @@
      *
      * @param resources
      * @param {?string} bundle
-     * @param {?boolean} sync
      * @returns {*}
      */
-    Static.prototype.load = function(resources, bundle, sync) {
+    Static.prototype.load = function(resources, bundle) {
 
         var self = this;
 
-        // Handle loading synchronously
-        if(sync) {
-            return this.sync(resources, bundle);
-        }
-
         // Cached bundle.
-        if (bundle && this.bundles[bundle]) {
+        if ("string" === typeof bundle && this.bundles[bundle]) {
             return this.bundles[bundle];
         }
 
-        if ("string" === typeof resources) {
-            resources = [resources];
-        }
-
-        return this[bundle] = this.bundles[bundle] = Promise.all(resources.map(function(url) {
+        var promise = Promise.all(resources.map(function(url) {
 
             if (self.isJS(url)) {
-                return self.script(url);
+                return self.script([url]);
             }
 
             if (self.isCSS(url)) {
                 return self.css(url);
-            } 
+            }
 
             return self.image(url);
 
         }));
 
+        if ("string" === typeof bundle) {
+            this.bundles[bundle] = promise;
+        }
+
+        return promise;
+
     };
 
+    /**
+     * [function description]
+     * @param  {array} resources [description]
+     * @param  {string} bundle    [description]
+     * @return {Promise}           [description]
+     */
     Static.prototype.sync = function(resources, bundle) {
 
         var self = this;
@@ -114,14 +205,6 @@
         }
 
         var promise = new Promise(function(resolve, reject) {
-
-            if ("string" === typeof resources) {
-                resources = [resources];
-            }
-
-            if (! Array.isArray(resources) || ! resources.length) {
-                reject("No resources supplied");
-            }
 
             var promise = self.load(resources.shift());
             resources.forEach(function(url) {
@@ -151,7 +234,7 @@
      */
     Static.prototype.loadCSS = function(href, media) {
 
-        this.stylesheets[href] = this.stylesheets[href] || new Promise(function (resolve, reject) {
+        return this.stylesheets[href] = this.stylesheets[href] || new Promise(function (resolve, reject) {
 
             var ss = window.document.createElement("link");
             var ref = window.document.getElementsByTagName("script")[0];
@@ -160,27 +243,22 @@
             ss.rel = "stylesheet";
             ss.href = href;
             ss.media = "only x";
-            ss.onerror = function(err) {
-                reject(err);
-            };
+            ss.onerror = reject;
+            ss.onload = resolve;
 
-            ss.onload = function() {
-                resolve();
-            };
-
-            ref.parentNode.insertBefore( ss, ref );
-            ss.onloadcssdefined = function( cb ){
+            ref.parentNode.insertBefore(ss, ref);
+            ss.onloadcssdefined = function(cb){
                 var defined;
-                for( var i = 0; i < sheets.length; i++ ){
-                    if( sheets[ i ].href && sheets[ i ].href === ss.href ){
+                for (var i = 0; i < sheets.length; i++){
+                    if( sheets[i].href && sheets[i].href === ss.href ){
                         defined = true;
                     }
                 }
-                if( defined ){
+                if(defined){
                     cb();
                 } else {
                     setTimeout(function() {
-                        ss.onloadcssdefined( cb );
+                        ss.onloadcssdefined(cb);
                     });
                 }
             };
@@ -190,8 +268,6 @@
             });
 
         });
-
-        return this.stylesheets[href];
 
     };
 
@@ -215,23 +291,16 @@
      * @returns {Promise}
      */
     Static.prototype.loadScript = function(src) {
-
-        this.scripts[src] = this.scripts[src] || new Promise(function (resolve, reject) {
-
+        return this.scripts[src] = this.scripts[src] || new Promise(function (resolve, reject) {
             var t = document.getElementsByTagName("script")[0];
             var s = document.createElement("script");
-
             s.type = "text/javascript";
             s.src = src;
             s.async = true;
             s.onload = resolve;
             s.onerror = s.onabort = reject;
             t.parentNode.insertBefore(s, t);
-
         });
-
-        return this.scripts[src];
-
     };
 
     /**
@@ -241,17 +310,18 @@
      */
     Static.prototype.script = function(url) {
         var self = this;
-        return Array.isArray(url) ? Promise.all(url.map(function(item) {
+        return Promise.all(url.map(function(item) {
             return self.loadScript(item);
-        })) : this.loadScript(url);
+        }));
     };
 
     /**
-     *
-     * @param src
-     * @returns {Promise}
+     * [function description]
+     * @param  {[type]} src     [description]
+     * @param  {[type]} element [description]
+     * @return {[type]}         [description]
      */
-    Static.prototype.loadImage = function(src) {
+    Static.prototype.loadImage = function(src, element) {
 
         this.images[src] = this.images[src] || new Promise(function (resolve, reject) {
 
@@ -259,6 +329,11 @@
             img.src = src;
             img.onerror = reject;
             img.onload = function() {
+                // If passing an element, replace the element
+                // with the new image.
+                if (element instanceof HTMLElement) {
+                    element.appendChild(img);
+                }
                 resolve(img);
             };
 
@@ -270,18 +345,23 @@
 
     /**
      *
-     * @param {array|string} src
+     * @param {array} src
      * @returns {Promise}
      */
     Static.prototype.image = function(src) {
 
         var self = this;
-        return Array.isArray(src) ? Promise.all(src.map(function(item) {
+        return Promise.all(src.map(function(item) {
             return self.loadImage(item);
-        })) : this.loadImage(src);
+        }));
 
     };
 
+    /**
+     * [function description]
+     * @param  {[type]} url [description]
+     * @return {[type]}     [description]
+     */
     Static.prototype.get = function(url) {
 
         return new Promise(function(resolve, reject) {
@@ -293,34 +373,43 @@
             }
 
             var req = new XMLHttpRequest();
-
             req.onerror = reject;
             req.open("GET", url, true);
             req.onload = function() {
-                storage.setItem(url, req.responseText);
-                resolve(req.responseText);
+                try {
+                    storage.setItem(url, req.responseText);
+                    resolve(req.responseText);
+                } catch(e) {
+                    reject(e);
+                }
             };
-
             req.send();
 
         });
 
     };
 
+    /**
+     * [function description]
+     * @param  {[type]} url [description]
+     * @param  {[type]} ele [description]
+     * @return {[type]}     [description]
+     */
     Static.prototype.getScript = function(url, ele) {
-
         this.get(url).then(function(data) {
-
             var s = document.createElement("script");
             s.type = "text/javascript";
             s.text = data;
-
             (ele || document.head).appendChild(s);
-
         });
-
     };
 
+    /**
+     * [function description]
+     * @param  {[type]} url [description]
+     * @param  {[type]} ele [description]
+     * @return {[type]}     [description]
+     */
     Static.prototype.getStylesheet = function(url, ele) {
 
         this.get(url).then(function(data) {
@@ -335,58 +424,95 @@
 
     };
 
-    Static.prototype.getImage = function(url, outputFormat) {
+    /**
+     * [function description]
+     * @param  {[type]} url    [description]
+     * @param  {[type]} parent [description]
+     * @return {Promise}        [description]
+     */
+    Static.prototype.getImage = function(url, parent) {
 
-        return new Promise(function(resolve, reject) {
+        var self = this;
+        var type = typeof parent;
+        if ("undefined" !== type) {
+            if ("string" == type) {
+                parent = document.querySelector(parent);
+            }
+            if (! parent instanceof HTMLElement) {
+                parent = null;
+            }
+        }
 
-            var contents = storage.getItem(url);
-            if(contents) {
-                resolve(contents);
-                return;
+        var promise = new Promise(function(resolve, reject) {
+
+            // var contents = storage.getItem(url);
+            // if(contents) {
+            //     resolve(contents);
+            //     return;
+            // }
+
+            var req = new XMLHttpRequest();
+            req.open("GET", url, true);
+            req.responseType = "arraybuffer";
+            req.onerror = reject;
+
+            if (self.clientHints) {
+
+                // Check for connection speed.
+                var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                if (connection) {
+                    req.setRequestHeader("Downlink", connection.downlinkMax);
+                }
+
+                // Set Save-Data
+                req.setRequestHeader("Save-Data", self.saveData ? 1 : 0);
+
+                // Set DPR
+                req.setRequestHeader("DPR", window.devicePixelRatio || 1);
+
+                // Set Viewport-Width
+                req.setRequestHeader("Viewport-Width", document.documentElement.clientWidth	|| window.innerWidth);
+
+                // Set width of parent element.
+                if(parent) {
+                    req.setRequestHeader("Width", parent.offsetWidth);
+                }
+
             }
 
-            var format = outputFormat || "image/png";
-            var img = new Image();
-
-            img.onerror = reject;
-            img.onload = function() {
-
-                var canvas = document.createElement("canvas");
-                var ctx = canvas.getContext("2d"), dataURL;
-
-                canvas.height = this.height;
-                canvas.width = this.width;
-
-                ctx.drawImage(this, 0, 0);
-                dataURL = canvas.toDataURL(format);
-
+            req.onload = function() {
+                var arr = new Uint8Array(this.response);
+                var raw = String.fromCharCode.apply(null,arr);
+                var b64=btoa(raw);
+                var dataURL = "data:" + this.getResponseHeader("Content-Type") + ";base64,"+b64;
                 resolve(dataURL);
-
-                storage.setItem(url, dataURL);
-
             };
 
-            img.src = url;
+            req.send();
 
         });
+
+        if (parent) {
+            promise.then(function(data) {
+                var img = new Image();
+                img.src = data;
+                parent.appendChild(img);
+            });
+        }
+
+        return promise;
 
     };
 
     /**
-     * Same as load() except it caches the files in localStorage.
-     *
-     * @param url
-     * @param bundle
-     * @returns {*}
+     * [function description]
+     * @param  {Array} url    [description]
+     * @param  {string} bundle [description]
+     * @return {Promise}        [description]
      */
     Static.prototype.cache = function(url, bundle) {
 
         var self = this;
-
-        if("string" === typeof url) {
-            url = [url];
-        }
-
         var promise = Promise.all(url.map(function(src) {
 
             if (self.isJS(src)) {
@@ -411,23 +537,58 @@
 
     };
 
+    /**
+     * [function description]
+     * @param  {[type]} selector [description]
+     * @return {[type]}          [description]
+     */
+    Static.prototype.loadImagesBySelector = function(selector) {
+        var cachedList = document.querySelectorAll(selector || ".mobile-img");
+        for (var i = 0, _i = cachedList.length; i < _i; ++i) {
+            var item = cachedList[i];
+            var url = item.getAttribute("data-src");
+            if (url) {
+                this.getImage(url, item);
+            }
+        }
+    };
+
+    /**
+     * [function description]
+     * @param  {Array} resources [description]
+     * @return {[type]}           [description]
+     */
     Static.prototype.clear = function(resources) {
 
-        if("string" === typeof resources) {
-            resources = [resources];
-        }
-
+        var self = this;
         resources.forEach(function(key) {
             storage.removeItem(key);
+            if (self.scripts[key]) {
+                delete self.scripts[key];
+            }
+            if (self.stylesheets[key]) {
+                delete self.stylesheets[key];
+            }
+            if (self.images[key]) {
+                delete self.images[key];
+            }
         });
 
     };
 
+    /**
+     * [function description]
+     * @return {[type]} [description]
+     */
     Static.prototype._$$reset = function() {
-        this.bundles = [];
+
+        this.bundles = {};
         this.scripts = {};
         this.stylesheets = {};
         this.images = {};
+        this.clientHints = false;
+        this.saveData = false;
+
     };
 
     window.$static = new Static();

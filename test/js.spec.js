@@ -2,7 +2,9 @@
 /* global $static */
 describe("javascript test suite", function() {
 
-    var url = "//cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js";
+    window.localStorage.clear();
+
+    var url = "https://cdn.jsdelivr.net/jquery/3.0.0-alpha1/jquery.min.js";
     var url2 = "/invalid.js";
 
     beforeEach(function() {
@@ -30,7 +32,7 @@ describe("javascript test suite", function() {
             done();
         };
 
-        $static.script(url).then(e, e);
+        $static.script([url]).then(e, e);
 
     });
 
@@ -61,15 +63,15 @@ describe("javascript test suite", function() {
 
     it("should cache scripts in localStorage", function(done) {
 
-        var e = function() {
+        $static.cache([url]).then(function() {
             var script = window.localStorage.getItem(url);
             expect(typeof script).toBe("string");
-            expect((script || "").length > 1000).toBe(true);
-            expect((script || "").indexOf("jQuery") > -1).toBe(true);
+            expect(!!(script || "").length).toBe(true);
             done();
-        };
-
-        $static.cache([url]).then(e, e);
+        }, function() {
+            expect(false).toBe(true);
+            done();
+        });
 
     });
 
@@ -82,6 +84,27 @@ describe("javascript test suite", function() {
             }, function() {
                 expect(false).toBe(true);
                 done();
+            });
+    });
+
+    it("should clear scripts by url", function(done) {
+        $static
+            .script([url])
+            .then(function() {
+                expect(Object.keys($static.scripts).length).toBe(1);
+                $static.clear([url]);
+                expect(Object.keys($static.scripts).length).toBe(0);
+                done();
+            });
+    });
+
+    it("should reset variables", function() {
+        $static
+            .script([url])
+            .then(function() {
+                expect(Object.keys($static.scripts).length).toBe(1);
+                $static._$$reset();
+                expect(Object.keys($static.scripts).length).toBe(1);
             });
     });
 

@@ -11,7 +11,7 @@ module.exports = function(config) {
 
         // list of files / patterns to load in the browser
         files: [
-            "dist/static.js",
+            "src/static.js",
             "test/**/*.spec.js"
         ],
 
@@ -26,7 +26,7 @@ module.exports = function(config) {
         },
 
         coverageReporter: {
-            type: "html",
+            type: "lcov",
             dir: "reports/"
         },
 
